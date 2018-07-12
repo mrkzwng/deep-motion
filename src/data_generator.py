@@ -21,7 +21,7 @@ FFPROBE_BIN = "ffprobe"
 # VID_DIR = "/media/neil/Neil's 5TB HDD/deep-motion_data/youtube-8m-videos"     # HDD too slow -_-
 VID_DIR = "/media/neil/Neil's 240GB SSD/deep-motion_data/youtube-8m-videos"
 
-KITTI_VID_DIR = "/media/neil/Neil's 240GB SSD/deep-motion_data/KITTI_RAW/train/"
+KITTI_VID_DIR = "../../data/KITTI/"
 
 FRAME_DISTS = [3, 5, 7, 9]
 
@@ -241,7 +241,13 @@ def kitti_batch_generator(batch_size, frame_dists=(2, 4, 6), data_aug=True):
                     X[batch_i, :, :, 3:] = np.flipud(X[batch_i, :, :, 3:])
                     y[batch_i] = np.flipud(y[batch_i])
 
-        yield np.transpose(X, (0, 3, 1, 2)).astype("float32") / 255., np.transpose(y, (0, 3, 1, 2)).astype("float32") / 255.
+        # yield np.transpose(X, (0, 3, 1, 2)).astype("float32") / 255., np.transpose(y, (0, 3, 1, 2)).astype("float32") / 255.
+
+        # keras tensorflow backend doesn't require transpose to (B, C, H, W)
+        X = X.astype("float32") / 255.
+        y = y.astype("float32") / 255.
+        
+        yield X, y
 
 
 def main():

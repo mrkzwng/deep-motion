@@ -44,8 +44,8 @@ BATCH_SIZE = 16
 NUM_EPOCHS = 1000
 NUM_CHANNELS = 3
 
-LOAD_PRE_TRAINED_MODEL = False
-DO_TESTING = False
+LOAD_PRE_TRAINED_MODEL = True
+DO_TESTING = True
 
 
 # need to use this when I require batches from an already memory-loaded X, y
@@ -62,16 +62,40 @@ def np_array_batch_generator(X, y, batch_size):
 def main():
     ##### DATA SETUP #####
     # the only pre-processing is to divide by 255, to make pixel values between 0 and 1
+
+    # X_train = np.load("X_small_train.npy")[:500, :, :32].astype("float32") / 255.
+    # y_train = np.load("y_small_train.npy")[:500, :, :32].astype("float32") / 255.
+    # X_val = np.load("X_small_val.npy")[:1000, :, :32].astype("float32") / 255.
+    # y_val = np.load("y_small_val.npy")[:1000, :, :32].astype("float32") / 255.
+
+    # X_train = np.load("X_train.npy")[1050:, :, :320].astype("float32") / 255.
+    # y_train = np.load("y_train.npy")[1050:, :, :320].astype("float32") / 255.
+    # X_train = np.load("X_train.npy")[50:1050, :, :320].astype("float32") / 255.
+    # y_train = np.load("y_train.npy")[50:1050, :, :320].astype("float32") / 255.
+    # X_val = np.load("X_val.npy")[:100, :, :320].astype("float32") / 255.
+    # y_val = np.load("y_val.npy")[:100, :, :320].astype("float32") / 255.
+
     X_val = np.load("X_val_KITTI.npy").astype("float32") / 255.
     y_val = np.load("y_val_KITTI.npy").astype("float32") / 255.
 
     ##### MODEL SETUP #####
+    # model = FI_CNN_model(NUM_CHANNELS)
+    # model = FI_CNN_model_BN(NUM_CHANNELS)
+    # model = get_unet()
     model = get_unet_2(input_shape=(6, 128, 384))
+    # model = get_unet_3(input_shape=(6, 128, 384), batch_size=BATCH_SIZE)
 
     # optimizer = SGD(lr=LEARNING_RATE, decay = 0., momentum = 0.9, nesterov = True)
     optimizer = adam(lr=LEARNING_RATE, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
+
+    # loss = "hinge"
+    # loss = "mse"
+    # loss = "categorical_crossentropy"
+    # loss = "binary_crossentropy"
     loss = charbonnier
+
     model.compile(loss=loss, optimizer=optimizer)
+
 
     if DO_TESTING:
         # Do predictions using weights for network trained on just the KITTI dataset
@@ -126,9 +150,11 @@ def main():
     ##### TRAINING SETUP #####
     logging.warning("USING loss AS MODEL CHECKPOINT METRIC, CHANGE LATER!")
     callbacks = [
+        # ModelCheckpoint(filepath="./../model_weights/weights.hdf5", monitor='val_loss', save_best_only=True, verbose=1),
         ModelCheckpoint(filepath="./../model_weights/weights.hdf5", monitor='loss', save_best_only=True, verbose=1),
         ReduceLROnPlateau(monitor="loss", factor=0.5, patience=20, verbose=1)
     ]
+    # callbacks.append(TensorBoard(log_dir="./../tensorboard_logs", write_graph=False))
 
     if LOAD_PRE_TRAINED_MODEL:
         print ""
