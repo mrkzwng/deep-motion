@@ -171,10 +171,8 @@ for i in ${files[@]}; do
                 shortname=$i
                 fullname=$i
         fi
-	echo "Downloading: "$shortname
-        wget 'http://kitti.is.tue.mpg.de/kitti/raw_data/'$fullname
+        echo "Downloading: "$shortname
+        wget 'https://s3.eu-central-1.amazonaws.com/avg-kitti/raw_data/'$fullname
         unzip -o $shortname
         rm $shortname
 done
-
-

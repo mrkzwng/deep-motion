@@ -21,7 +21,7 @@ FFPROBE_BIN = "ffprobe"
 # VID_DIR = "/media/neil/Neil's 5TB HDD/deep-motion_data/youtube-8m-videos"     # HDD too slow -_-
 VID_DIR = "/media/neil/Neil's 240GB SSD/deep-motion_data/youtube-8m-videos"
 
-KITTI_VID_DIR = "../../data/KITTI/"
+KITTI_VID_DIR = "../../data/KITTI/resized/resized/"
 
 FRAME_DISTS = [3, 5, 7, 9]
 
@@ -211,11 +211,11 @@ def batch_generator(batch_size, num_channels, batch_image_size):
 
 
 # batch of samples generator for KITTI dataset (much easier since KITTI are just image sequences)
-def kitti_batch_generator(batch_size, frame_dists=(2, 4, 6), data_aug=True):
+def kitti_batch_generator(batch_size, frame_dists=2, data_aug=True):
     raw_im_list = open(os.path.join(KITTI_VID_DIR, "im_list.txt")).read().splitlines()
     im_list = []
     for im in raw_im_list:
-        if not int(im.split('/')[-1].split('.')[0]) < max(frame_dists):
+        if int(im.split('/')[-1].split('.')[0]) >= frame_dists:
             im_list.append(im)
 
     while 1:
@@ -246,7 +246,7 @@ def kitti_batch_generator(batch_size, frame_dists=(2, 4, 6), data_aug=True):
         # keras tensorflow backend doesn't require transpose to (B, C, H, W)
         X = X.astype("float32") / 255.
         y = y.astype("float32") / 255.
-        
+
         yield X, y
 
 
